@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/i18n.ts","./src/main.tsx","./src/vite-env.d.ts","./src/api/activity.ts","./src/api/client.ts","./src/api/finance.ts","./src/api/member.ts","./src/api/message.ts","./src/auth/authcontext.tsx","./src/locales/en.ts","./src/locales/zh-cn.ts","./src/pages/activities.tsx","./src/pages/login.tsx","./src/pages/profile.tsx"],"version":"5.9.3"}

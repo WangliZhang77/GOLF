@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:16
+    container_name: golf_crm_db
+    environment:
+      POSTGRES_USER: golf
+      POSTGRES_PASSWORD: golf
+      POSTGRES_DB: golf_crm
+    ports:
+      - "5432:5432"
+    volumes:
+      - golf_crm_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U golf -d golf_crm"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: golf_crm_backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg://golf:golf@db:5432/golf_crm
+      CORS_ORIGINS: http://localhost:5173,http://localhost:5174
+    ports:
+      - "8000:8000"
+
+volumes:
+  golf_crm_pgdata:
