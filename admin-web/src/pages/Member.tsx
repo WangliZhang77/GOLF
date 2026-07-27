@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import {
   Button,
+  Descriptions,
   Form,
   Input,
+  InputNumber,
+  List,
   Modal,
   Popconfirm,
   Select,
@@ -13,6 +16,11 @@ import {
 } from "antd";
 import { useTranslation } from "react-i18next";
 
+import {
+  adjustHandicap,
+  getMemberHandicap,
+  type HandicapDashboard,
+} from "../api/handicap";
 import {
   blacklistMember,
   createMember,
@@ -42,7 +50,10 @@ export default function MemberPage() {
   const [members, setMembers] = useState<Member[]>([]);
   const [branches, setBranches] = useState<Organization[]>([]);
   const [open, setOpen] = useState(false);
+  const [handicapTarget, setHandicapTarget] = useState<Member | null>(null);
+  const [handicapDashboard, setHandicapDashboard] = useState<HandicapDashboard | null>(null);
   const [form] = Form.useForm();
+  const [handicapForm] = Form.useForm();
 
   const load = () => {
     listMembers().then(setMembers).catch(() => {});
@@ -100,6 +111,30 @@ export default function MemberPage() {
     }
   };
 
+  const onOpenHandicap = async (row: Member) => {
+    setHandicapTarget(row);
+    handicapForm.resetFields();
+    try {
+      setHandicapDashboard(await getMemberHandicap(row.id));
+    } catch {
+      message.error(t("member.opFailed"));
+    }
+  };
+
+  const onAdjustHandicap = async () => {
+    if (!handicapTarget) return;
+    const v = await handicapForm.validateFields();
+    try {
+      const updated = await adjustHandicap(handicapTarget.id, v.new_handicap, v.remark);
+      setHandicapDashboard(updated);
+      handicapForm.resetFields();
+      message.success(t("handicap.adjustSuccess"));
+      load();
+    } catch {
+      message.error(t("member.opFailed"));
+    }
+  };
+
   const hasPrivate = members.some((m) => m.passport_no !== undefined);
 
   const columns = [
@@ -143,6 +178,9 @@ export default function MemberPage() {
       title: t("member.actions"),
       render: (_: unknown, row: Member) => (
         <Space>
+          <Button size="small" onClick={() => onOpenHandicap(row)}>
+            {t("handicap.adjust")}
+          </Button>
           {row.level === "probationary" && (
             <Button size="small" type="primary" onClick={() => onPromote(row.id)}>
               {t("member.promote")}
@@ -214,6 +252,58 @@ export default function MemberPage() {
             <Input.Password autoComplete="new-password" />
           </Form.Item>
         </Form>
+      </Modal>
+
+      <Modal
+        title={`${t("handicap.adjust")} - ${handicapTarget?.chinese_name ?? ""}`}
+        open={!!handicapTarget}
+        onCancel={() => setHandicapTarget(null)}
+        footer={null}
+        width={480}
+      >
+        {handicapDashboard && (
+          <Space direction="vertical" style={{ width: "100%" }}>
+            <Descriptions bordered size="small" column={1}>
+              <Descriptions.Item label={t("handicap.current")}>
+                {handicapDashboard.current_handicap ?? "-"}
+              </Descriptions.Item>
+              <Descriptions.Item label={t("handicap.trend")}>
+                {t(`handicapTrend.${handicapDashboard.trend}`)}
+              </Descriptions.Item>
+            </Descriptions>
+            <Form form={handicapForm} layout="inline">
+              <Form.Item name="new_handicap" rules={[{ required: true }]}>
+                <InputNumber
+                  min={0}
+                  max={54}
+                  step={0.1}
+                  placeholder={t("handicap.newValue")}
+                />
+              </Form.Item>
+              <Form.Item name="remark">
+                <Input placeholder={t("handicap.remark")} />
+              </Form.Item>
+              <Form.Item>
+                <Button type="primary" onClick={onAdjustHandicap}>
+                  {t("handicap.submit")}
+                </Button>
+              </Form.Item>
+            </Form>
+            <List
+              size="small"
+              header={t("handicap.history")}
+              bordered
+              dataSource={handicapDashboard.history}
+              renderItem={(h) => (
+                <List.Item>
+                  {h.date} · {h.old_handicap ?? "-"} → {h.new_handicap}
+                  {h.remark ? ` · ${h.remark}` : ""}
+                </List.Item>
+              )}
+              locale={{ emptyText: t("handicap.noHistory") }}
+            />
+          </Space>
+        )}
       </Modal>
     </Space>
   );

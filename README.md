@@ -2,9 +2,11 @@
 
 [中文说明](README.zh-CN.md)
 
-An integrated membership and event CRM for the New Zealand Chinese Golf Association (V1.0 Web product). It includes an admin dashboard, a member web app, and a FastAPI backend with bilingual (Chinese/English) support.
+An integrated membership, event, and tournament CRM for the New Zealand Chinese Golf Association. It includes an admin dashboard, a member web app, and a FastAPI backend with bilingual (Chinese/English) support. V1.0 covers core association management; V1.5 extends the platform into a full golf tournament operations system (registration → grouping → scoring → review → ranking → handicap tracking).
 
-## Features (V1.0)
+## Features
+
+### V1.0 — Core CRM
 
 | Module | Highlights |
 |--------|------------|
@@ -14,6 +16,20 @@ An integrated membership and event CRM for the New Zealand Chinese Golf Associat
 | Activities | Publish, register (incl. family), QR check-in, attendance |
 | Finance | Ledger, reconcile, void/refund, member bills (no payment gateway) |
 | Messages | In-app notifications: registration, dues reminders, activity alerts |
+
+### V1.5 — Tournament Platform
+
+| Module | Highlights |
+|--------|------------|
+| Competitions | Create/publish tournaments, registration with eligibility gating (blacklist, outstanding dues, handicap cap) |
+| Grouping | Deterministic handicap-balanced grouping algorithm with team-clustering avoidance, tee-time scheduling, manual move/swap |
+| Scoring | 18-hole digital scorecards, live gross/net calculation, draft → submit workflow |
+| Review | Group peer confirmation → event director approval, reject-and-resubmit loop |
+| Ranking | Individual (net score) and team (average net score) rankings, auto-awarded champion/runner-up/third, manual award override |
+| Handicap | Audited manual adjustments with full history, trend dashboard (declining/rising/stable) |
+| Courses | Course directory with holes/par/rating/slope |
+| Sponsors | Sponsor CRM with contracts (amount, dates, benefits, optional competition link) |
+| Analytics | Member/activity/competition/finance dashboard, branch-scoped for council admins |
 
 ## Tech Stack
 
@@ -78,6 +94,7 @@ cd member-web && npm install && npm run dev  # http://localhost:5174
 | finance | demo123456 | Finance officer | Admin |
 | council | demo123456 | Council admin | Admin |
 | captain | demo123456 | Team captain | Admin |
+| director | demo123456 | Event director | Admin |
 | demo | demo123456 | Member | Member |
 
 ## Tests
@@ -85,14 +102,18 @@ cd member-web && npm install && npm run dev  # http://localhost:5174
 ```bash
 cd backend
 .venv\Scripts\activate
-pytest -q    # 50 tests
+pytest -q    # 137 tests
 ```
+
+> **Note:** the test suite runs against an in-memory SQLite database and is fully green (137/137). The Alembic migration chain has not yet been re-verified end-to-end against a live PostgreSQL instance in this environment — do that (`alembic upgrade head` against Docker's `db` service) before treating the backend as production-ready.
 
 ## Roadmap
 
-Phases 0–7 are complete (scaffold → auth → org → members → activities → finance → messages → integration demo).
+**V1.0 (Phases 0-7)** — complete: scaffold → auth → org → members → activities → finance → messages → integration demo.
 
-Deferred to V1.5+: cloud deployment, KMS/privacy compliance, WeChat mini-program, tournament scoring, Stripe/PayPal payments.
+**V1.5 (Phases 8-17)** — complete: competition CRUD & eligibility → grouping → scoring & review → ranking → handicap tracking → course directory → sponsor CRM → analytics dashboard → member home upgrade.
+
+**Deferred to a later release:** cloud deployment, KMS/privacy compliance, WeChat mini-program, gender-based grouping, NZ Golf Handicap API integration, Stripe/PayPal payment gateway integration.
 
 ## License
 

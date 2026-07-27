@@ -18,6 +18,17 @@ from app.models.activity import (
     RegistrantType,
     RegistrationStatus,
 )
+from app.models.competition import (
+    Competition,
+    CompetitionRegApprovalStatus,
+    CompetitionRegistration,
+    CompetitionRegPaymentStatus,
+    CompetitionStatus,
+    CompetitionType,
+)
+from app.models.course import Course
+from app.models.grouping import CompetitionGroup, CompetitionGroupPlayer, GroupStatus
+from app.services.grouping import GroupingPlayer, generate_groups
 from app.models.finance import (
     FinanceLedger,
     IncomeCategory,
@@ -146,6 +157,12 @@ def create_demo_world(db) -> None:
     )
     captain = _get_or_create_user(
         db, username="captain", full_name="A队队长", role=UserRole.team_captain
+    )
+    _get_or_create_user(
+        db,
+        username="director",
+        full_name="赛事总监",
+        role=UserRole.event_director,
     )
 
     team = (
@@ -467,6 +484,180 @@ def create_demo_registration(db) -> None:
     print("已创建演示报名样例：演示会员报名「演示周末下场」")
 
 
+def create_demo_course(db) -> None:
+    """创建一个演示球场，作为赛事 course_id 的关联目标。"""
+    exists = db.query(Course).filter(Course.name_zh == "演示高尔夫球场").first()
+    if exists:
+        print("演示球场已存在，跳过")
+        return
+    db.add(
+        Course(
+            name_zh="演示高尔夫球场",
+            name_en="Demo Golf Course",
+            address="1 Fairway Drive, Auckland",
+            contact_name="球场前台",
+            contact_phone="+6491234567",
+            is_active=True,
+        )
+    )
+    db.commit()
+    print("已创建演示球场：演示高尔夫球场")
+
+
+def create_demo_competition(db) -> None:
+    """创建一条已开放报名的演示赛事，便于会员端/管理后台联调。"""
+    exists = db.query(Competition).filter(Competition.name == "演示公开赛").first()
+    if exists:
+        print("演示赛事已存在，跳过")
+        return
+    branch = (
+        db.query(Organization)
+        .filter(Organization.level == OrgLevel.branch)
+        .first()
+    )
+    course = db.query(Course).filter(Course.name_zh == "演示高尔夫球场").first()
+    director = db.query(User).filter(User.username == "director").first()
+    if not branch:
+        print("无分会，跳过演示赛事")
+        return
+    db.add(
+        Competition(
+            name="演示公开赛",
+            description="Phase 8 赛事管理演示：报名资格校验（会员状态/欠费/差点）",
+            competition_type=CompetitionType.official,
+            level="A级",
+            course_id=course.id if course else None,
+            branch_id=branch.id,
+            start_time=datetime.now(timezone.utc) + timedelta(days=21),
+            registration_deadline=datetime.now(timezone.utc) + timedelta(days=14),
+            fee=50,
+            max_players=40,
+            max_handicap=24.0,
+            status=CompetitionStatus.open,
+            created_by=director.id if director else None,
+        )
+    )
+    db.commit()
+    print("已创建演示赛事：演示公开赛（已开放报名，差点上限 24.0）")
+
+
+def create_demo_competition_registration(db) -> None:
+    """让演示会员（差点 18.0，符合上限 24.0）已报名演示赛事。"""
+    member = db.query(Member).filter(Member.chinese_name == "演示会员").first()
+    competition = db.query(Competition).filter(Competition.name == "演示公开赛").first()
+    if not member or not competition:
+        print("缺演示会员或演示赛事，跳过赛事报名样例")
+        return
+    exists = (
+        db.query(CompetitionRegistration)
+        .filter(
+            CompetitionRegistration.competition_id == competition.id,
+            CompetitionRegistration.member_id == member.id,
+        )
+        .first()
+    )
+    if exists:
+        print("演示赛事报名样例已存在，跳过")
+        return
+    db.add(
+        CompetitionRegistration(
+            competition_id=competition.id,
+            member_id=member.id,
+            user_id=member.user_id,
+            team_id=member.team_id,
+            payment_status=CompetitionRegPaymentStatus.unpaid,
+            approval_status=CompetitionRegApprovalStatus.pending,
+            created_by=member.user_id,
+        )
+    )
+    db.commit()
+    print("已创建演示赛事报名样例：演示会员报名「演示公开赛」（待审核）")
+
+
+def create_demo_groups(db) -> None:
+    """审核通过演示报名并生成分组，便于两端联调 Phase 9 分组页面。"""
+    competition = db.query(Competition).filter(Competition.name == "演示公开赛").first()
+    if not competition:
+        print("无演示赛事，跳过分组样例")
+        return
+    existing = (
+        db.query(CompetitionGroup)
+        .filter(
+            CompetitionGroup.competition_id == competition.id,
+            CompetitionGroup.is_deleted.is_(False),
+        )
+        .first()
+    )
+    if existing:
+        print("演示分组已存在，跳过")
+        return
+
+    regs = (
+        db.query(CompetitionRegistration)
+        .filter(
+            CompetitionRegistration.competition_id == competition.id,
+            CompetitionRegistration.is_deleted.is_(False),
+        )
+        .all()
+    )
+    if not regs:
+        print("无赛事报名，跳过分组样例")
+        return
+    for reg in regs:
+        if reg.approval_status != CompetitionRegApprovalStatus.approved:
+            reg.approval_status = CompetitionRegApprovalStatus.approved
+    db.commit()
+
+    approved = (
+        db.query(CompetitionRegistration, Member)
+        .join(Member, Member.id == CompetitionRegistration.member_id)
+        .filter(
+            CompetitionRegistration.competition_id == competition.id,
+            CompetitionRegistration.approval_status == CompetitionRegApprovalStatus.approved,
+            CompetitionRegistration.is_deleted.is_(False),
+        )
+        .all()
+    )
+    players = [
+        GroupingPlayer(
+            member_id=reg.member_id,
+            handicap=member.handicap,
+            team_id=reg.team_id,
+            registration_id=reg.id,
+        )
+        for reg, member in approved
+    ]
+    grouped = generate_groups(players, group_size=4)
+
+    director = db.query(User).filter(User.username == "director").first()
+    creator = director.id if director else None
+    for gi, group_players in enumerate(grouped):
+        group = CompetitionGroup(
+            competition_id=competition.id,
+            group_number=gi + 1,
+            starting_hole=1,
+            status=GroupStatus.scheduled,
+            created_by=creator,
+        )
+        db.add(group)
+        db.flush()
+        for oi, gp in enumerate(group_players):
+            db.add(
+                CompetitionGroupPlayer(
+                    competition_id=competition.id,
+                    group_id=group.id,
+                    member_id=gp.member_id,
+                    registration_id=gp.registration_id,
+                    order_number=oi + 1,
+                    handicap=gp.handicap,
+                    team_id=gp.team_id,
+                    created_by=creator,
+                )
+            )
+    db.commit()
+    print(f"已创建演示分组：{len(grouped)} 组（已同步审核通过演示报名）")
+
+
 def seed_all() -> None:
     create_first_superuser()
     db = SessionLocal()
@@ -479,6 +670,10 @@ def seed_all() -> None:
         create_demo_messages(db)
         create_demo_attendance(db)
         create_demo_registration(db)
+        create_demo_course(db)
+        create_demo_competition(db)
+        create_demo_competition_registration(db)
+        create_demo_groups(db)
     finally:
         db.close()
 

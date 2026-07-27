@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   Button,
   Card,
+  Collapse,
   Dialog,
   Form,
   Input,
@@ -14,6 +15,7 @@ import { useTranslation } from "react-i18next";
 
 import { getMyMember, updateMyMember, type MemberProfile } from "../api/member";
 import { getMyBills, type Bill } from "../api/finance";
+import { getMyHandicap, type HandicapDashboard } from "../api/handicap";
 import {
   getUnreadCount,
   listMyMessages,
@@ -28,6 +30,7 @@ export default function Profile() {
   const { t, i18n } = useTranslation();
   const { user, logout } = useAuth();
   const [profile, setProfile] = useState<MemberProfile | null>(null);
+  const [handicap, setHandicap] = useState<HandicapDashboard | null>(null);
   const [bills, setBills] = useState<Bill[]>([]);
   const [messages, setMessages] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -59,6 +62,9 @@ export default function Profile() {
     load();
     getMyBills()
       .then(setBills)
+      .catch(() => {});
+    getMyHandicap()
+      .then(setHandicap)
       .catch(() => {});
     loadMessages();
   }, []);
@@ -167,6 +173,42 @@ export default function Profile() {
               {t("profile.passport")}
             </List.Item>
           </List>
+        </Card>
+      )}
+
+      {handicap && (
+        <Card title={t("handicap.title")}>
+          <Space direction="vertical" block>
+            <Space align="center">
+              <span style={{ fontSize: 28, fontWeight: 700 }}>
+                {handicap.current_handicap ?? "-"}
+              </span>
+              <Tag
+                color={
+                  handicap.trend === "declining"
+                    ? "success"
+                    : handicap.trend === "rising"
+                      ? "warning"
+                      : "default"
+                }
+              >
+                {t(`handicapTrend.${handicap.trend}`)}
+              </Tag>
+            </Space>
+            {handicap.history.length > 0 && (
+              <Collapse>
+                <Collapse.Panel key="history" title={t("handicap.history")}>
+                  <List>
+                    {handicap.history.map((h) => (
+                      <List.Item key={h.id}>
+                        {h.date} · {h.old_handicap ?? "-"} → {h.new_handicap}
+                      </List.Item>
+                    ))}
+                  </List>
+                </Collapse.Panel>
+              </Collapse>
+            )}
+          </Space>
         </Card>
       )}
 

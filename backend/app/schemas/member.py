@@ -62,10 +62,11 @@ class MemberCreate(BaseModel):
 
 
 class MemberAdminUpdate(BaseModel):
+    """差点不在此处编辑：改差点需走 PATCH /handicap/members/{id}，以保留审计历史。"""
+
     english_name: str | None = None
     golf_age: int | None = None
     club_number: str | None = None
-    handicap: Decimal | None = None
     nz_address: str | None = None
     local_phone: str | None = None
     passport_no: str | None = None

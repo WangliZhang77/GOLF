@@ -13,12 +13,15 @@ import {
 import enUS from "antd/locale/en_US";
 import zhCN from "antd/locale/zh_CN";
 import {
+  BankOutlined,
   DashboardOutlined,
   DollarOutlined,
+  EnvironmentOutlined,
   LogoutOutlined,
   MessageOutlined,
   ScheduleOutlined,
   TeamOutlined,
+  TrophyOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
@@ -27,9 +30,12 @@ import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import MemberPage from "./pages/Member";
 import ActivityPage from "./pages/Activity";
+import CompetitionPage from "./pages/Competition";
+import CoursePage from "./pages/Course";
 import FinancePage from "./pages/Finance";
 import MessagePage from "./pages/Message";
 import OrganizationPage from "./pages/Organization";
+import SponsorPage from "./pages/Sponsor";
 import { useAuth } from "./auth/AuthContext";
 import { menusForRole, type MenuKey } from "./auth/roles";
 import { SUPPORTED_LANGS, type Lang } from "./i18n";
@@ -41,6 +47,9 @@ const MENU_ICONS: Record<MenuKey, ReactNode> = {
   organization: <TeamOutlined />,
   member: <UserOutlined />,
   activity: <ScheduleOutlined />,
+  competition: <TrophyOutlined />,
+  course: <EnvironmentOutlined />,
+  sponsor: <BankOutlined />,
   finance: <DollarOutlined />,
   message: <MessageOutlined />,
 };
@@ -185,12 +194,18 @@ function ContentArea({ selected }: { selected: MenuKey }) {
       {selected === "organization" && <OrganizationPage />}
       {selected === "member" && <MemberPage />}
       {selected === "activity" && <ActivityPage />}
+      {selected === "competition" && <CompetitionPage />}
+      {selected === "course" && <CoursePage />}
+      {selected === "sponsor" && <SponsorPage />}
       {selected === "finance" && <FinancePage />}
       {selected === "message" && <MessagePage />}
       {selected !== "dashboard" &&
         selected !== "organization" &&
         selected !== "member" &&
         selected !== "activity" &&
+        selected !== "competition" &&
+        selected !== "course" &&
+        selected !== "sponsor" &&
         selected !== "finance" &&
         selected !== "message" && <Placeholder module={selected} />}
     </div>
