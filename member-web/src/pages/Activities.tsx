@@ -10,6 +10,12 @@ import {
   Tag,
   Toast,
 } from "antd-mobile";
+import {
+  AddCircleOutline,
+  CalendarOutline,
+  ScanningOutline,
+  TeamOutline,
+} from "antd-mobile-icons";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -96,10 +102,17 @@ export default function Activities() {
   return (
     <Space direction="vertical" block>
       <Button block color="primary" onClick={() => setCheckinOpen(true)}>
-        {t("activity.scanCheckin")}
+        <ScanningOutline /> {t("activity.scanCheckin")}
       </Button>
 
-      <List header={t("activity.listTitle")}>
+      <List
+        header={
+          <Space align="center">
+            <CalendarOutline />
+            <span>{t("activity.listTitle")}</span>
+          </Space>
+        }
+      >
         {rows.map((a) => (
           <List.Item
             key={a.id}
@@ -124,7 +137,7 @@ export default function Activities() {
                   disabled={a.course_slots_locked}
                   onClick={() => onRegister(a.id, false)}
                 >
-                  {t("activity.register")}
+                  <AddCircleOutline /> {t("activity.register")}
                 </Button>
                 {a.family_allowed && (
                   <Button
@@ -132,7 +145,7 @@ export default function Activities() {
                     onClick={() => onRegister(a.id, true)}
                     disabled={a.course_slots_locked}
                   >
-                    {t("activity.registerWithFamily")}
+                    <TeamOutline /> {t("activity.registerWithFamily")}
                   </Button>
                 )}
               </Space>

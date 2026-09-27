@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button, NavBar, SpinLoading, TabBar } from "antd-mobile";
+import { AppOutline, CalendarOutline, FlagOutline, UserOutline } from "antd-mobile-icons";
 import { useTranslation } from "react-i18next";
 
 import { getUnreadCount } from "./api/message";
@@ -79,11 +80,12 @@ export default function App() {
       </div>
 
       <TabBar activeKey={activeTab} onChange={setActiveTab}>
-        <TabBar.Item key="home" title={t("tab.home")} />
-        <TabBar.Item key="activity" title={t("tab.activity")} />
-        <TabBar.Item key="competition" title={t("tab.competition")} />
+        <TabBar.Item key="home" icon={<AppOutline />} title={t("tab.home")} />
+        <TabBar.Item key="activity" icon={<CalendarOutline />} title={t("tab.activity")} />
+        <TabBar.Item key="competition" icon={<FlagOutline />} title={t("tab.competition")} />
         <TabBar.Item
           key="profile"
+          icon={<UserOutline />}
           title={t("tab.profile")}
           badge={profileUnread > 0 ? profileUnread : undefined}
         />

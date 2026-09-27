@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   Button,
   Card,
@@ -11,7 +11,16 @@ import {
   Tag,
   Toast,
 } from "antd-mobile";
+import {
+  BellOutline,
+  BillOutline,
+  EditSOutline,
+  HistogramOutline,
+  UserContactOutline,
+  UserOutline,
+} from "antd-mobile-icons";
 import { useTranslation } from "react-i18next";
+import IconBadge from "../components/IconBadge";
 
 import { getMyMember, updateMyMember, type MemberProfile } from "../api/member";
 import { getMyBills, type Bill } from "../api/finance";
@@ -25,6 +34,25 @@ import {
   type Notification,
 } from "../api/message";
 import { useAuth } from "../auth/AuthContext";
+
+function SectionTitle({
+  icon,
+  color,
+  background,
+  children,
+}: {
+  icon: ReactNode;
+  color: string;
+  background: string;
+  children: ReactNode;
+}) {
+  return (
+    <Space align="center">
+      <IconBadge icon={icon} size={28} color={color} background={background} />
+      <span>{children}</span>
+    </Space>
+  );
+}
 
 export default function Profile() {
   const { t, i18n } = useTranslation();
@@ -93,7 +121,13 @@ export default function Profile() {
 
   return (
     <Space direction="vertical" block>
-      <Card title={t("profile.account")}>
+      <Card
+        title={
+          <SectionTitle icon={<UserOutline />} color="#1677ff" background="#e6f4ff">
+            {t("profile.account")}
+          </SectionTitle>
+        }
+      >
         <List>
           <List.Item extra={user?.full_name || "-"}>{t("profile.fullName")}</List.Item>
           <List.Item extra={user?.username}>{t("profile.username")}</List.Item>
@@ -111,7 +145,11 @@ export default function Profile() {
 
       {profile && (
         <Card
-          title={t("profile.memberCard")}
+          title={
+            <SectionTitle icon={<UserContactOutline />} color="#1f7a3d" background="#e8f5e9">
+              {t("profile.memberCard")}
+            </SectionTitle>
+          }
           extra={
             <Button
               size="mini"
@@ -124,7 +162,7 @@ export default function Profile() {
                 setEditing(true);
               }}
             >
-              {t("profile.edit")}
+              <EditSOutline /> {t("profile.edit")}
             </Button>
           }
         >
@@ -177,7 +215,13 @@ export default function Profile() {
       )}
 
       {handicap && (
-        <Card title={t("handicap.title")}>
+        <Card
+          title={
+            <SectionTitle icon={<HistogramOutline />} color="#1f7a3d" background="#e8f5e9">
+              {t("handicap.title")}
+            </SectionTitle>
+          }
+        >
           <Space direction="vertical" block>
             <Space align="center">
               <span style={{ fontSize: 28, fontWeight: 700 }}>
@@ -212,7 +256,13 @@ export default function Profile() {
         </Card>
       )}
 
-      <Card title={t("bills.title")}>
+      <Card
+        title={
+          <SectionTitle icon={<BillOutline />} color="#d48806" background="#fff7e6">
+            {t("bills.title")}
+          </SectionTitle>
+        }
+      >
         {bills.length === 0 ? (
           <div style={{ color: "#999", padding: 8 }}>{t("bills.empty")}</div>
         ) : (
@@ -257,8 +307,10 @@ export default function Profile() {
 
       <Card
         title={
-          <Space>
-            <span>{t("messages.title")}</span>
+          <Space align="center">
+            <SectionTitle icon={<BellOutline />} color="#cf1322" background="#fff1f0">
+              {t("messages.title")}
+            </SectionTitle>
             {unreadCount > 0 && <Tag color="danger">{unreadCount}</Tag>}
           </Space>
         }

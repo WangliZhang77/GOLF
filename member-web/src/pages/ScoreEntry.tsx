@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
 import { Button, Card, List, NavBar, Space, Stepper, Tag, Toast } from "antd-mobile";
+import {
+  CheckCircleOutline,
+  FlagOutline,
+  HistogramOutline,
+  SendOutline,
+  TeamOutline,
+} from "antd-mobile-icons";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -10,6 +17,7 @@ import {
   updateHole,
   type ScoreCard,
 } from "../api/scoring";
+import IconBadge from "../components/IconBadge";
 
 const HOLES = Array.from({ length: 18 }, (_, i) => i + 1);
 
@@ -83,11 +91,14 @@ export default function ScoreEntry({
 
       {card && (
         <>
-          <Card>
-            <Space direction="vertical">
+          <Card bodyStyle={{ padding: 16 }}>
+            <Space align="center" style={{ marginBottom: 10 }}>
+              <IconBadge icon={<HistogramOutline />} background="#e6f4ff" color="#1677ff" />
               <Tag color={card.status === "approved" ? "success" : "primary"}>
                 {t(`scoreCardStatus.${card.status}`)}
               </Tag>
+            </Space>
+            <Space direction="vertical">
               <span>
                 {t("scoring.out")}: {card.out_score ?? "-"} · {t("scoring.in")}:{" "}
                 {card.in_score ?? "-"} · {t("scoring.total")}: {card.total_score ?? "-"}
@@ -103,7 +114,14 @@ export default function ScoreEntry({
             </Space>
           </Card>
 
-          <List header={t("scoring.holes")}>
+          <List
+            header={
+              <Space align="center">
+                <FlagOutline />
+                <span>{t("scoring.holes")}</span>
+              </Space>
+            }
+          >
             {HOLES.map((h) => {
               const value = card[`hole${h}` as keyof ScoreCard] as number | null;
               return (
@@ -125,7 +143,7 @@ export default function ScoreEntry({
 
           {editable && (
             <Button block color="primary" disabled={filled < 18} onClick={onSubmit}>
-              {t("scoring.submit")}
+              <SendOutline /> {t("scoring.submit")}
             </Button>
           )}
 
@@ -137,13 +155,20 @@ export default function ScoreEntry({
         </>
       )}
 
-      <List header={t("scoring.peerReview")}>
+      <List
+        header={
+          <Space align="center">
+            <TeamOutline />
+            <span>{t("scoring.peerReview")}</span>
+          </Space>
+        }
+      >
         {otherPeers.map((p) => (
           <List.Item
             key={p.id}
             extra={
               <Button size="mini" onClick={() => onConfirmPeer(p.id)}>
-                {t("scoring.confirm")}
+                <CheckCircleOutline /> {t("scoring.confirm")}
               </Button>
             }
           >

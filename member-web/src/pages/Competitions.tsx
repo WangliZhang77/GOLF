@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
 import { Button, Card, Dialog, List, Space, Tag, Toast } from "antd-mobile";
+import {
+  AddCircleOutline,
+  EditSOutline,
+  FlagOutline,
+  StarOutline,
+  TeamOutline,
+  UserOutline,
+} from "antd-mobile-icons";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -64,7 +72,14 @@ export default function Competitions() {
 
   return (
     <Space direction="vertical" block>
-      <List header={t("competition.listTitle")}>
+      <List
+        header={
+          <Space align="center">
+            <FlagOutline />
+            <span>{t("competition.listTitle")}</span>
+          </Space>
+        }
+      >
         {rows.map((c) => {
           const canRegister =
             c.status === "open" &&
@@ -104,18 +119,18 @@ export default function Competitions() {
                     </Tag>
                     {c.my_registration_status === "approved" && (
                       <Button size="mini" onClick={() => onViewGroup(c.id)}>
-                        {t("grouping.myGroup")}
+                        <TeamOutline /> {t("grouping.myGroup")}
                       </Button>
                     )}
                     {c.my_registration_status === "approved" &&
                       (c.status === "playing" || c.status === "review") && (
                         <Button size="mini" color="primary" onClick={() => setScoringId(c.id)}>
-                          {t("scoring.title")}
+                          <EditSOutline /> {t("scoring.title")}
                         </Button>
                       )}
                     {c.status === "completed" && (
                       <Button size="mini" onClick={() => setRankingId(c.id)}>
-                        {t("ranking.title")}
+                        <StarOutline /> {t("ranking.title")}
                       </Button>
                     )}
                   </Space>
@@ -126,7 +141,7 @@ export default function Competitions() {
                     disabled={!canRegister}
                     onClick={() => onRegister(c.id)}
                   >
-                    {t("competition.register")}
+                    <AddCircleOutline /> {t("competition.register")}
                   </Button>
                 )
               }
@@ -158,7 +173,7 @@ export default function Competitions() {
               </span>
               <List>
                 {group.players.map((p) => (
-                  <List.Item key={p.id}>
+                  <List.Item key={p.id} prefix={<UserOutline />}>
                     #{p.order_number} · {t("competition.memberId")} {p.member_id}
                     {p.handicap ? ` · HC ${p.handicap}` : ""}
                   </List.Item>

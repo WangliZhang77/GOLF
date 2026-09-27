@@ -1,5 +1,12 @@
-import { useEffect, useState } from "react";
-import { Card, List, Space, Tag } from "antd-mobile";
+import { useEffect, useState, type CSSProperties } from "react";
+import { Card, Grid, List, Space, Tag } from "antd-mobile";
+import {
+  BillOutline,
+  FlagOutline,
+  HistogramOutline,
+  TeamOutline,
+  UserOutline,
+} from "antd-mobile-icons";
 import { useTranslation } from "react-i18next";
 
 import { getMyBills, type Bill } from "../api/finance";
@@ -7,6 +14,7 @@ import { getMyHandicap, type HandicapDashboard } from "../api/handicap";
 import { getMyMember, type MemberProfile } from "../api/member";
 import { listTeams, type Team } from "../api/org";
 import { listCompetitions, type Competition } from "../api/competition";
+import IconBadge from "../components/IconBadge";
 
 export default function Home() {
   const { t } = useTranslation();
@@ -40,6 +48,7 @@ export default function Home() {
 
   const outstandingBills = bills.filter((b) => !b.is_paid && b.status === "confirmed");
   const outstandingAmount = outstandingBills.reduce((sum, b) => sum + Number(b.amount), 0);
+  const duesClear = outstandingBills.length === 0;
 
   const registered = competitions.filter((c) => c.my_registration_status);
   const now = Date.now();
@@ -52,41 +61,81 @@ export default function Home() {
   const recentCompetition = past[0] ?? upcoming[0] ?? null;
 
   return (
-    <Space direction="vertical" block>
+    <Space direction="vertical" block style={{ "--gap": "12px" } as CSSProperties}>
       {profile && (
-        <Card title={t("home.myProfile")}>
-          <List>
-            <List.Item extra={profile.chinese_name}>{t("home.name")}</List.Item>
-            <List.Item extra={<Tag color="primary">{t(`level.${profile.level}`)}</Tag>}>
-              {t("home.level")}
-            </List.Item>
-            <List.Item extra={teamName ?? t("home.noTeam")}>{t("home.myTeam")}</List.Item>
-          </List>
-        </Card>
-      )}
-
-      {handicap && (
-        <Card title={t("home.myHandicap")}>
+        <Card
+          style={{
+            background: "linear-gradient(135deg, #1f7a3d 0%, #35a35a 100%)",
+            borderRadius: 16,
+          }}
+          bodyStyle={{ padding: 20 }}
+        >
           <Space align="center">
-            <span style={{ fontSize: 24, fontWeight: 700 }}>
-              {handicap.current_handicap ?? "-"}
-            </span>
-            <Tag
-              color={
-                handicap.trend === "declining"
-                  ? "success"
-                  : handicap.trend === "rising"
-                    ? "warning"
-                    : "default"
-              }
-            >
-              {t(`handicapTrend.${handicap.trend}`)}
-            </Tag>
+            <IconBadge
+              icon={<UserOutline />}
+              size={52}
+              background="rgba(255,255,255,0.25)"
+              color="#fff"
+            />
+            <Space direction="vertical" style={{ "--gap": "2px" } as CSSProperties}>
+              <span style={{ color: "#fff", fontSize: 18, fontWeight: 700 }}>
+                {profile.chinese_name}
+              </span>
+              <Tag color="default" style={{ background: "rgba(255,255,255,0.85)" }}>
+                {t(`level.${profile.level}`)}
+              </Tag>
+            </Space>
           </Space>
         </Card>
       )}
 
-      <Card title={t("home.recentCompetition")}>
+      <Grid columns={2} gap={12}>
+        <Grid.Item>
+          <Card bodyStyle={{ padding: 14 }}>
+            <Space direction="vertical" style={{ "--gap": "6px" } as CSSProperties}>
+              <IconBadge icon={<TeamOutline />} background="#e6f4ff" color="#1677ff" />
+              <span style={{ fontSize: 12, color: "#999" }}>{t("home.myTeam")}</span>
+              <span style={{ fontSize: 15, fontWeight: 600 }}>
+                {teamName ?? t("home.noTeam")}
+              </span>
+            </Space>
+          </Card>
+        </Grid.Item>
+        <Grid.Item>
+          <Card bodyStyle={{ padding: 14 }}>
+            <Space direction="vertical" style={{ "--gap": "6px" } as CSSProperties}>
+              <IconBadge icon={<HistogramOutline />} background="#e8f5e9" color="#1f7a3d" />
+              <span style={{ fontSize: 12, color: "#999" }}>{t("home.myHandicap")}</span>
+              <span style={{ fontSize: 18, fontWeight: 700 }}>
+                {handicap?.current_handicap ?? "-"}
+              </span>
+              {handicap && (
+                <Tag
+                  color={
+                    handicap.trend === "declining"
+                      ? "success"
+                      : handicap.trend === "rising"
+                        ? "warning"
+                        : "default"
+                  }
+                  style={{ whiteSpace: "normal", wordBreak: "break-word" }}
+                >
+                  {t(`handicapTrend.${handicap.trend}`)}
+                </Tag>
+              )}
+            </Space>
+          </Card>
+        </Grid.Item>
+      </Grid>
+
+      <Card
+        title={
+          <Space align="center">
+            <IconBadge icon={<FlagOutline />} size={28} background="#fff7e6" color="#d48806" />
+            <span>{t("home.recentCompetition")}</span>
+          </Space>
+        }
+      >
         {recentCompetition ? (
           <List>
             <List.Item
@@ -105,8 +154,20 @@ export default function Home() {
         )}
       </Card>
 
-      <Card title={t("home.duesStatus")}>
-        {outstandingBills.length === 0 ? (
+      <Card
+        title={
+          <Space align="center">
+            <IconBadge
+              icon={<BillOutline />}
+              size={28}
+              background={duesClear ? "#e8f5e9" : "#fff1f0"}
+              color={duesClear ? "#1f7a3d" : "#cf1322"}
+            />
+            <span>{t("home.duesStatus")}</span>
+          </Space>
+        }
+      >
+        {duesClear ? (
           <Tag color="success">{t("home.noDues")}</Tag>
         ) : (
           <Space direction="vertical">
