@@ -3,7 +3,7 @@ import axios from "axios";
 import i18n from "../i18n";
 
 const client = axios.create({
-  baseURL: "/api",
+  baseURL: import.meta.env.VITE_API_BASE_URL || "/api",
   timeout: 10000,
 });
 

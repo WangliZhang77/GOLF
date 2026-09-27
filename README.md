@@ -4,6 +4,13 @@
 
 An integrated membership, event, and tournament CRM for the New Zealand Chinese Golf Association. It includes an admin dashboard, a member web app, and a FastAPI backend with bilingual (Chinese/English) support. V1.0 covers core association management; V1.5 extends the platform into a full golf tournament operations system (registration → grouping → scoring → review → ranking → handicap tracking).
 
+## Live Demo
+
+- Admin dashboard: _link pending deployment_
+- Member app: _link pending deployment_
+
+The backend runs on a free-tier host and may take ~30-60s to wake up on the first request after a period of inactivity. See [Demo Accounts](#demo-accounts) below to log in — the seed data includes both an **open tournament** (try the registration/eligibility flow) and a **completed tournament** with a published ranking (see grouping → scoring → review → ranking end-to-end without doing anything).
+
 ## Features
 
 ### V1.0 — Core CRM
@@ -105,7 +112,7 @@ cd backend
 pytest -q    # 137 tests
 ```
 
-> **Note:** the test suite runs against an in-memory SQLite database and is fully green (137/137). The Alembic migration chain has not yet been re-verified end-to-end against a live PostgreSQL instance in this environment — do that (`alembic upgrade head` against Docker's `db` service) before treating the backend as production-ready.
+> **Note:** the test suite runs against an in-memory SQLite database and is fully green (137/137). The full Alembic migration chain has also been verified end-to-end against a real PostgreSQL instance, including a full reseed of the English demo data.
 
 ## Roadmap
 

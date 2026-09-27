@@ -110,6 +110,7 @@ export default {
     fee: "Fee",
     maxHandicap: "Max handicap",
     registered: "Registered",
+    memberId: "Member ID",
   },
   competitionType: {
     official: "Official",
@@ -117,6 +118,15 @@ export default {
     invitation: "Invitational",
     social: "Social",
     training: "Training",
+  },
+  competitionStatus: {
+    draft: "Draft",
+    open: "Open",
+    closed: "Closed",
+    playing: "Playing",
+    review: "Score Review",
+    completed: "Completed",
+    cancelled: "Cancelled",
   },
   competitionApprovalStatus: {
     pending: "Pending",

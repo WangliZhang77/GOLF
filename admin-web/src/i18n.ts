@@ -7,7 +7,7 @@ import zhCN from "./locales/zh-CN";
 export const SUPPORTED_LANGS = ["zh-CN", "en"] as const;
 export type Lang = (typeof SUPPORTED_LANGS)[number];
 
-const saved = (localStorage.getItem("lang") as Lang) || "zh-CN";
+const saved = (localStorage.getItem("lang") as Lang) || "en";
 
 i18n.use(initReactI18next).init({
   resources: {
@@ -15,7 +15,7 @@ i18n.use(initReactI18next).init({
     en: { translation: en },
   },
   lng: saved,
-  fallbackLng: "zh-CN",
+  fallbackLng: "en",
   interpolation: { escapeValue: false },
 });
 

@@ -110,6 +110,7 @@ export default {
     fee: "报名费用",
     maxHandicap: "差点上限",
     registered: "已报名",
+    memberId: "会员ID",
   },
   competitionType: {
     official: "协会正式赛事",
@@ -117,6 +118,15 @@ export default {
     invitation: "邀请赛",
     social: "社交比赛",
     training: "培训活动",
+  },
+  competitionStatus: {
+    draft: "草稿",
+    open: "开放报名",
+    closed: "报名结束",
+    playing: "比赛中",
+    review: "成绩审核",
+    completed: "已完成",
+    cancelled: "已取消",
   },
   competitionApprovalStatus: {
     pending: "待审核",
