@@ -55,6 +55,9 @@ export default {
     passwordRequired: "Please enter password",
     failed: "Login failed, please check your credentials",
     success: "Signed in",
+    quickAccessHint: "No account needed — try the live demo",
+    continueAsAdmin: "Continue as Admin",
+    continueAsMember: "View Member App Demo",
   },
   role: {
     super_admin: "Super Admin",

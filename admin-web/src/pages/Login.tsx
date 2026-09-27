@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Button, Card, Form, Input, Select, Space, Typography, message } from "antd";
+import { useEffect, useState } from "react";
+import { Button, Card, Divider, Form, Input, Select, Space, Typography, message } from "antd";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 
@@ -8,10 +8,13 @@ import { SUPPORTED_LANGS, type Lang } from "../i18n";
 
 const { Title } = Typography;
 
+const MEMBER_APP_URL = import.meta.env.VITE_MEMBER_APP_URL || "http://localhost:5174";
+
 export default function Login() {
   const { t, i18n } = useTranslation();
   const { login } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [quickLoading, setQuickLoading] = useState<"admin" | null>(null);
 
   const onFinish = async (values: { username: string; password: string }) => {
     setLoading(true);
@@ -23,6 +26,28 @@ export default function Login() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const quickLoginAdmin = async () => {
+    setQuickLoading("admin");
+    try {
+      await login("admin", "admin123456");
+    } catch {
+      message.error(t("login.failed"));
+    } finally {
+      setQuickLoading(null);
+    }
+  };
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("autologin") === "1") {
+      quickLoginAdmin();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const viewMemberApp = () => {
+    window.location.href = `${MEMBER_APP_URL}/?autologin=1`;
   };
 
   const changeLang = (lang: Lang) => {
@@ -85,6 +110,15 @@ export default function Login() {
               label: l === "zh-CN" ? "简体中文" : "English",
             }))}
           />
+          <Divider style={{ margin: "4px 0" }}>{t("login.quickAccessHint")}</Divider>
+          <Space direction="vertical" style={{ width: "100%" }}>
+            <Button block loading={quickLoading === "admin"} onClick={quickLoginAdmin}>
+              {t("login.continueAsAdmin")}
+            </Button>
+            <Button block onClick={viewMemberApp}>
+              {t("login.continueAsMember")}
+            </Button>
+          </Space>
         </Space>
       </Card>
     </div>

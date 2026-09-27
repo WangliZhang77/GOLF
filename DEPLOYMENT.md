@@ -41,9 +41,18 @@ Import the repo **twice** as two separate projects (both auto-detect Vite: build
 - Root Directory: `member-web`
 - Environment variable: `VITE_API_BASE_URL` = `https://<your-render-url>/api` (same value)
 
-Deploy both. You'll get two `*.vercel.app` URLs.
+Deploy both. You'll get two `*.vercel.app` URLs — note them down, you need each one for the other project in the next step.
 
-## 4. Close the loop: CORS
+## 4. Cross-link the two apps
+
+Each login page has a "quick demo access" panel — a one-click "Continue as Admin/Member" button for its own app, and a button that jumps to the *other* app pre-authenticated. That cross-link needs to know the other app's URL:
+
+- On the **admin-web** Vercel project, add `VITE_MEMBER_APP_URL` = the member app's `*.vercel.app` URL from step 3.
+- On the **member-web** Vercel project, add `VITE_ADMIN_APP_URL` = the admin app's `*.vercel.app` URL from step 3.
+
+Redeploy both (Vercel does this automatically when you save an env var).
+
+## 5. Close the loop: CORS
 
 Go back to Render → your backend service → Environment, and set:
 
@@ -53,9 +62,9 @@ CORS_ORIGINS=https://<your-admin>.vercel.app,https://<your-member>.vercel.app
 
 Redeploy the backend (Render does this automatically when you save an env var change).
 
-## 5. Smoke test
+## 6. Smoke test
 
-Open both Vercel URLs. Log in with the demo accounts from the README (`admin` / `director` / `demo`, all documented there). Confirm:
+Open both Vercel URLs. Each login page has one-click "Continue as Admin" / "Continue as Member" buttons (no typing needed) plus a button that jumps to the other app already authenticated — try both directions. Or log in manually with the demo accounts from the README (`admin` / `director` / `demo`). Confirm:
 - The admin dashboard's analytics sections render numbers (not blank — this confirms the backend + DB + CORS are all wired correctly).
 - "Auckland Club Championship 2025" in Competitions shows a published ranking.
 - The member app's home page shows Alex Chen's profile, handicap trend, and recent competition.

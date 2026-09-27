@@ -26,6 +26,9 @@ export default {
     password: "密码",
     submit: "登录",
     failed: "登录失败，请检查用户名或密码",
+    quickAccessHint: "无需账号，直接体验演示",
+    continueAsMember: "以会员身份进入",
+    continueAsAdmin: "查看管理后台演示",
   },
   profile: {
     username: "用户名",

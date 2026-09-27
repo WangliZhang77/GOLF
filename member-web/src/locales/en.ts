@@ -26,6 +26,9 @@ export default {
     password: "Password",
     submit: "Sign in",
     failed: "Login failed, please check your credentials",
+    quickAccessHint: "No account needed — try the live demo",
+    continueAsMember: "Continue as Member",
+    continueAsAdmin: "View Admin Dashboard Demo",
   },
   profile: {
     username: "Username",

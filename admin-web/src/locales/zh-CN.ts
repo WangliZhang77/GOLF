@@ -55,6 +55,9 @@ export default {
     passwordRequired: "请输入密码",
     failed: "登录失败，请检查用户名或密码",
     success: "登录成功",
+    quickAccessHint: "无需账号，直接体验演示",
+    continueAsAdmin: "以管理员身份进入",
+    continueAsMember: "查看会员端演示",
   },
   role: {
     super_admin: "超级管理员",
